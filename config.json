@@ -1,0 +1,30 @@
+{
+    "LOG": {
+        "console": true,
+        "level": "DEBUG",
+        "path": "/data/logs/servers/Market",
+        "name": "market.log",
+        "clear": true,
+        "backup_count": 5
+    },
+    "RABBITMQ": {
+        "host": "127.0.0.1",
+        "port": 5672,
+        "username": "test",
+        "password": "213456"
+    },
+    "PROXY": "http://127.0.0.1:1087",
+
+    "PLATFORMS": {
+        "binance": {
+            "wss": "wss://stream.binance.com:9443/stream?streams=",
+            "symbols": [
+                "BTC/USD",
+                "LTC/USD"
+            ],
+            "channels": [
+                "ticker", "kline", "orderbook", "trade"
+            ]
+        }
+    }
+}
