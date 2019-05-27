@@ -4,7 +4,7 @@
 
 
 #### 安装
-需要安装 `quant` 量化交易框架，使用 `pip` 可以简单方便安装:
+需要安装 `thenextquant` 量化交易框架，使用 `pip` 可以简单方便安装:
 ```text
 pip install thenextquant
 ```

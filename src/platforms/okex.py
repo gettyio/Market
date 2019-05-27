@@ -16,10 +16,9 @@ from quant.utils import tools
 from quant.utils import logger
 from quant.config import config
 from quant.const import OKEX
-# from quant.event.ticker import EventTicker
-# from quant.event.trade import EventTrade
-from quant.event import EventOrderbook
 from quant.utils.websocket import Websocket
+from quant.event import EventOrderbook, EventTrade, EventKline
+from quant.order import ORDER_ACTION_BUY, ORDER_ACTION_SELL
 
 
 class OKEx(Websocket):
@@ -43,20 +42,29 @@ class OKEx(Websocket):
     async def connected_callback(self):
         """ 建立连接之后，订阅事件 ticker
         """
+        ches = []
         for ch in self._channels:
             if ch == "orderbook":  # 订阅orderbook行情
-                chs = []
                 for symbol in self._symbols:
                     ch = "spot/depth:{s}".format(s=symbol.replace("/", '-'))
-                    chs.append(ch)
-                msg = {
-                    "op": "subscribe",
-                    "args": chs
-                }
-                await self.ws.send_json(msg)
-                logger.info("subscribe orderbook success.", caller=self)
+                    ches.append(ch)
+            elif ch == "trade":
+                for symbol in self._symbols:
+                    ch = "spot/trade:{s}".format(s=symbol.replace("/", '-'))
+                    ches.append(ch)
+            elif ch == "kline":
+                for symbol in self._symbols:
+                    ch = "spot/candle60s:{s}".format(s=symbol.replace("/", '-'))
+                    ches.append(ch)
             else:
                 logger.error("channel error! channel:", ch, caller=self)
+        if ches:
+            msg = {
+                "op": "subscribe",
+                "args": ches
+            }
+            await self.ws.send_json(msg)
+            logger.info("subscribe orderbook success.", caller=self)
 
     async def process_binary(self, raw):
         """ 处理websocket上接收到的消息
@@ -81,6 +89,12 @@ class OKEx(Websocket):
                     await self.deal_orderbook_update(d)
             else:
                 logger.warn("unhandle msg:", msg, caller=self)
+        elif table == "spot/trade":
+            for d in msg["data"]:
+                await self.deal_trade_update(d)
+        elif table == "spot/candle60s":
+            for d in msg["data"]:
+                await self.deal_kline_update(d)
         else:
             logger.warn("unhandle msg:", msg, caller=self)
 
@@ -173,3 +187,53 @@ class OKEx(Websocket):
             }
             EventOrderbook(**orderbook).publish()
             logger.info("symbol:", symbol, "orderbook:", orderbook, caller=self)
+
+    async def deal_trade_update(self, data):
+        """ 处理trade数据
+        """
+        symbol = data.get("instrument_id").replace("-", "/")
+        if symbol not in self._symbols:
+            return
+        action = ORDER_ACTION_BUY if data["side"] == "buy" else ORDER_ACTION_SELL
+        price = "%.8f" % float(data["price"])
+        quantity = "%.8f" % float(data["size"])
+        timestamp = tools.utctime_str_to_mts(data["timestamp"])
+
+        # 推送trade数据
+        trade = {
+            "platform": self._platform,
+            "symbol": symbol,
+            "action": action,
+            "price": price,
+            "quantity": quantity,
+            "timestamp": timestamp
+        }
+        EventTrade(**trade).publish()
+        logger.info("symbol:", symbol, "trade:", trade, caller=self)
+
+    async def deal_kline_update(self, data):
+        """ 处理K线数据 1分钟
+        """
+        symbol = data["instrument_id"].replace("-", "/")
+        if symbol not in self._symbols:
+            return
+        timestamp = tools.utctime_str_to_mts(data["candle"][0])
+        _open = "%.8f" % float(data["candle"][1])
+        high = "%.8f" % float(data["candle"][2])
+        low = "%.8f" % float(data["candle"][3])
+        close = "%.8f" % float(data["candle"][4])
+        volume = "%.8f" % float(data["candle"][5])
+
+        # 推送trade数据
+        kline = {
+            "platform": self._platform,
+            "symbol": symbol,
+            "open": _open,
+            "high": high,
+            "low": low,
+            "close": close,
+            "volume": volume,
+            "timestamp": timestamp
+        }
+        EventKline(**kline).publish()
+        logger.info("symbol:", symbol, "kline:", kline, caller=self)
