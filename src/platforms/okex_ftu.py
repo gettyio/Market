@@ -37,6 +37,7 @@ class OKExFuture(Websocket):
         url = self._wss + "/ws/v3"
         super(OKExFuture, self).__init__(url)
         self.heartbeat_msg = "ping"
+        self.initialize()
 
     async def connected_callback(self):
         """ 建立连接之后，订阅事件 ticker
