@@ -11,7 +11,7 @@ import sys
 
 from quant.quant import quant
 from quant.config import config
-from quant.const import OKEX, OKEX_FUTURE, BINANCE
+from quant.const import OKEX, OKEX_FUTURE, BINANCE, DERIBIT
 
 
 def initialize():
@@ -25,6 +25,8 @@ def initialize():
             from platforms.okex_ftu import OKExFuture as Market
         elif platform == BINANCE:
             from platforms.binance import Binance as Market
+        elif platform == DERIBIT:
+            from platforms.deribit import Deribit as Market
         else:
             from quant.utils import logger
             logger.error("platform error! platform:", platform)
@@ -33,10 +35,7 @@ def initialize():
 
 
 def main():
-    if len(sys.argv) > 1:
-        config_file = sys.argv[1]
-    else:
-        config_file = "config.json"
+    config_file = sys.argv[1]  # 配置文件 config.json
     quant.initialize(config_file)
     initialize()
     quant.start()
