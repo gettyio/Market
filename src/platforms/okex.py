@@ -12,6 +12,7 @@ import zlib
 import json
 import copy
 
+from quant import const
 from quant.utils import tools
 from quant.utils import logger
 from quant.config import config
@@ -234,7 +235,8 @@ class OKEx(Websocket):
             "low": low,
             "close": close,
             "volume": volume,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "kline_type": const.MARKET_TYPE_KLINE
         }
         EventKline(**kline).publish()
         logger.info("symbol:", symbol, "kline:", kline, caller=self)

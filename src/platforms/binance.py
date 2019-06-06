@@ -8,6 +8,7 @@ Author: HuangTao
 Date:   2018/07/04
 """
 
+from quant import const
 from quant.utils import tools
 from quant.utils import logger
 from quant.config import config
@@ -82,6 +83,7 @@ class Binance(Websocket):
                 "close": data.get("k").get("c"),  # 收盘价
                 "volume": data.get("k").get("q"),  # 收盘价
                 "timestamp": data.get("k").get("t"),  # 时间戳
+                "kline_type": const.MARKET_TYPE_KLINE
             }
             EventKline(**kline).publish()
             logger.info("symbol:", symbol, "kline:", kline, caller=self)
