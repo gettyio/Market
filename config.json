@@ -17,7 +17,6 @@
 
     "PLATFORMS": {
         "binance": {
-            "wss": "wss://stream.binance.com:9443/stream?streams=",
             "symbols": [
                 "BTC/USD",
                 "LTC/USD"

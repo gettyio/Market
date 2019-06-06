@@ -11,6 +11,16 @@ pip install thenextquant
 
 #### 运行
 ```text
-python src/main.py config.json
+git clone https://github.com/TheNextQuant/Market.git  # 下载项目
+cd Market  # 进入项目目录
+vim config.json  # 编辑配置文件
+
+python src/main.py config.json  # 启动之前请修改配置文件
 ```
-> 配置请参考文档说明。
+> 配置请参考 [配置文件说明](https://github.com/TheNextQuant/thenextquant/blob/master/docs/configure/README.md)。
+
+
+#### 各大交易所行情
+
+- [Binance](docs/binance.md)
+
