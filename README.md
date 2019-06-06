@@ -23,4 +23,5 @@ python src/main.py config.json  # 启动之前请修改配置文件
 #### 各大交易所行情
 
 - [Binance](docs/binance.md)
-
+- [OKEx](docs/okex.md)
+- [OKEx Future](docs/okex_future.md)
